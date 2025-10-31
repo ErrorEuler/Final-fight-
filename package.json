@@ -1,0 +1,24 @@
+{
+  "name": "acss-1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss --input ./src/input.css --output ./public/css/output.css --watch",
+    "build": "tailwindcss --input ./src/input.css --output ./public/css/output.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.12",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/postcss": "^4.1.12",
+    "chart.js": "^4.5.0"
+  },
+  "description": ""
+}

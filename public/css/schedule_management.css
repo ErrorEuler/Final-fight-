@@ -1,0 +1,875 @@
+/* Toast container */
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  max-width: 28rem;
+  pointer-events: none;
+}
+
+/* Toast base styles */
+.validation-toast,
+.completion-toast {
+  pointer-events: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
+  border-left: 4px solid rgba(255, 255, 255, 0.3);
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.validation-toast.translate-x-full,
+.completion-toast.translate-x-full {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Toast hover effects */
+.validation-toast:hover,
+.completion-toast:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15),
+    0 15px 15px -5px rgba(0, 0, 0, 0.08);
+}
+
+/* Field validation styles */
+.border-red-500 {
+  border-color: #ef4444 !important;
+}
+
+.ring-2 {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+.ring-red-200 {
+  box-shadow: 0 0 0 2px rgba(254, 202, 202, 0.5) !important;
+}
+
+/* Loading overlay enhancement */
+#loading-overlay {
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#loading-overlay .bg-white {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* Mobile responsive toast */
+@media (max-width: 640px) {
+  #toast-container {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+
+  .validation-toast,
+  .completion-toast {
+    margin: 0 0 0.75rem 0;
+    padding: 1rem;
+  }
+
+  .validation-toast h4,
+  .completion-toast h4 {
+    font-size: 0.875rem;
+  }
+
+  .validation-toast ul,
+  .completion-toast ul {
+    font-size: 0.75rem;
+  }
+}
+
+/* Form field focus enhancement */
+select:focus,
+input:focus {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Enhanced generation results styling */
+#generation-results {
+  animation: fadeInUp 0.5s ease-out;
+  border-left: 4px solid #10b981;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success and warning result variations */
+#generation-results.warning {
+  border-left-color: #f59e0b;
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+}
+
+#generation-results.warning .text-green-500,
+#generation-results.warning .text-green-600,
+#generation-results.warning .text-green-800 {
+  color: #d97706 !important;
+}
+
+/* Button loading state */
+#generate-btn.loading {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+#generate-btn.loading::before {
+  content: "";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pulsing-loader {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #f59e0b 30%, rgba(245, 158, 11, 0.3) 70%);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
+
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+#schedule-modal:not(.hidden) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+#schedule-modal.hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 28rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+#schedule-modal:not(.hidden) .modal-content {
+  transform: scale(1);
+}
+
+/* Ensure modal appears above everything */
+#schedule-modal {
+  z-index: 10000 !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+.draggable {
+  cursor: grab;
+}
+
+.draggable:active {
+  cursor: grabbing;
+}
+
+.drop-zone {
+  min-height: 100px;
+  transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+  background-color: #fef3c7;
+}
+
+.schedule-card {
+  transition: all 0.3s ease;
+}
+
+.schedule-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-in;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  .schedule-card {
+    box-shadow: none;
+    border: 1px solid #374151;
+    page-break-inside: avoid;
+  }
+
+  .tab-content {
+    display: block !important;
+  }
+
+  #content-generate,
+  #content-manual {
+    display: none !important;
+  }
+
+  #content-schedule {
+    display: block !important;
+  }
+
+  #timetableGrid {
+    font-size: 12pt;
+    width: 100%;
+    overflow: visible;
+  }
+
+  #timetableGrid .grid-cols-7>div {
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    page-break-inside: avoid;
+  }
+
+  #timetableGrid .bg-gray-50 {
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-cols-7 {
+    display: block;
+  }
+
+  .grid-cols-7>div {
+    display: block;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem;
+  }
+
+  .grid-cols-7>div:first-child {
+    background-color: #f3f4f6;
+    font-weight: 600;
+  }
+}
+
+/* Full Screen Mode Styles */
+.fullscreen-mode .bg-white.rounded-xl {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.fullscreen-mode .max-w-7xl {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.fullscreen-mode #content-manual,
+.fullscreen-mode #content-schedule {
+  height: 100vh;
+  overflow: auto;
+}
+
+.fullscreen-mode .overflow-x-auto {
+  height: calc(100vh - 120px);
+}
+
+/* Ensure proper spacing in full screen */
+.fullscreen-mode .p-6 {
+  padding: 1.5rem;
+}
+
+/* Style for room capacity indicators */
+.room-capacity-good {
+  background-color: #f0fff4 !important;
+  color: #166534 !important;
+}
+
+.room-capacity-warning {
+  background-color: #fff0f0 !important;
+  color: #dc2626 !important;
+}
+
+.room-capacity-online {
+  background-color: #f0f9ff !important;
+  color: #0369a1 !important;
+}
+
+/* Section details animation */
+#section-details {
+  transition: all 0.3s ease-in-out;
+  border-left: 3px solid #3b82f6;
+}
+
+.fullscreen-mode .mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+/* Conflict styling */
+.border-red-500 {
+  border-color: #ef4444 !important;
+}
+
+.bg-red-50 {
+  background-color: #fef2f2 !important;
+}
+
+/* Dragging styles */
+.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Smooth transitions */
+.schedule-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.drop-zone {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Full screen modal fixes */
+.fullscreen-mode .modal-overlay {
+  z-index: 1001 !important;
+}
+
+/* Conflict tooltip */
+.conflict-tooltip {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Multiple schedules layout */
+.schedules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.schedule-card {
+  flex-shrink: 0;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Drag and Drop Styles */
+.schedule-card.dragging {
+    transform: rotate(5deg);
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.drop-zone.drag-over {
+    background-color: #f0f9ff;
+    border: 2px dashed #3b82f6;
+}
+
+.drop-zone.conflict {
+    background-color: #fef2f2;
+    border: 2px dashed #ef4444;
+    cursor: not-allowed;
+}
+
+.drop-zone.conflict::after {
+    content: "⚠️ Conflict";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.conflict-tooltip {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 250px;
+}
+
+/* Smooth transitions */
+.schedule-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.drop-zone {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Visual feedback for drag operations */
+.drag-preview {
+    opacity: 0.8;
+    transform: scale(0.95);
+}
+
+.drop-zone.conflict-high {
+    background-color: #fef2f2 !important;
+    border: 2px dashed #dc2626 !important;
+}
+
+.drop-zone.conflict-medium {
+    background-color: #fff7ed !important;
+    border: 2px dashed #ea580c !important;
+}
+
+.drop-zone.conflict-low {
+    background-color: #fefce8 !important;
+    border: 2px dashed #ca8a04 !important;
+}
+
+/* Conflict type indicators */
+.conflict-time { background-color: #fef2f2; }
+.conflict-room { background-color: #fff7ed; }
+.conflict-faculty { background-color: #f0f9ff; }
+.conflict-section { background-color: #faf5ff; }
+
+/* Better scrolling for many schedules */
+.schedules-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.schedules-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.schedules-container::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 2px;
+}
+
+.schedules-container::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 2px;
+}
+
+.schedules-container::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Improved drag and drop visual feedback */
+.dragging {
+  opacity: 0.6;
+  transform: rotate(2deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.drop-zone.drag-over {
+  background-color: #fefce8 !important;
+  border-color: #f59e0b !important;
+}
+
+/* Responsive adjustments for full screen */
+@media (max-width: 768px) {
+  .fullscreen-mode .flex.items-center.space-x-4 {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .fullscreen-mode .flex.items-center.space-x-4>* {
+    margin-bottom: 0.5rem;
+  }
+}
+
+
+/* University Header Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .university-header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    position: relative;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .university-info {
+    flex: 1;
+    text-align: center;
+  }
+
+  .university-name {
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .university-subtitle {
+    font-size: 10pt;
+    font-style: italic;
+    margin: 2px 0;
+  }
+
+  .logo-container {
+    width: 80px;
+    text-align: center;
+  }
+
+  .college-logo {
+    max-width: 70px;
+    max-height: 70px;
+  }
+
+  .semester-info {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 5px 0;
+  }
+
+  .academic-year {
+    font-size: 11pt;
+    font-weight: bold;
+  }
+
+  /* Schedule table styles */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-top: 10px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    text-align: center;
+    vertical-align: top;
+  }
+
+  .schedule-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+  }
+
+  .time-column {
+    width: 12%;
+  }
+
+  .days-column {
+    width: 8%;
+  }
+
+  .course-column {
+    width: 20%;
+  }
+
+  .units-column {
+    width: 15%;
+  }
+
+  .room-column {
+    width: 10%;
+  }
+
+  .section-column {
+    width: 15%;
+  }
+
+  .students-column {
+    width: 8%;
+  }
+
+  .faculty-column {
+    width: 12%;
+  }
+}
+
+/* Print layout adjustments */
+@page {
+  margin: 0.5in;
+  size: letter;
+}
+
+body {
+  line-height: 1.2;
+}
+
+.conflict-warning {
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.3;
+  animation: slideDown 0.3s ease-out;
+}
+
+.conflict-warning.success {
+  background-color: #f0f9ff;
+  border-left: 3px solid #0ea5e9;
+  color: #0369a1;
+}
+
+.conflict-warning.warning {
+  background-color: #fefce8;
+  border-left: 3px solid #eab308;
+  color: #854d0e;
+}
+
+.conflict-warning.error {
+  background-color: #fef2f2;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+}
+
+.conflict-warning.info {
+  background-color: #f0f9ff;
+  border-left: 3px solid #0ea5e9;
+  color: #0369a1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced input states */
+input.border-yellow-500,
+select.border-yellow-500 {
+  border-color: #eab308 !important;
+  background-color: #fefce8 !important;
+}
+
+input.border-red-500,
+select.border-red-500 {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+input.bg-yellow-50,
+select.bg-yellow-50 {
+  background-color: #fefce8 !important;
+}
+
+input.bg-red-50,
+select.bg-red-50 {
+  background-color: #fef2f2 !important;
+}
+
+/* Dynamic grid styles */
+.schedule-card {
+    transition: all 0.2s ease-in-out;
+    min-height: 60px;
+}
+
+.schedule-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.drop-zone {
+    min-height: 60px;
+    transition: all 0.2s ease-in-out;
+}
+
+.drop-zone.drag-over {
+    background-color: #fefce8;
+    border-color: #f59e0b;
+}
+
+.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Ensure consistent row heights */
+.grid-rows-\[minmax\(60px\2c auto\)\] > * {
+    min-height: 60px;
+}
+
+/* Smooth scrolling for the grid */
+.overflow-x-auto {
+    scroll-behavior: smooth;
+}
+
+/* Better visual feedback for time cells */
+.bg-gray-50 {
+    transition: background-color 0.2s ease;
+}
+
+.bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+/* Add to your CSS */
+#unassigned-courses-list {
+    transition: all 0.3s ease-in-out;
+}
+
+.conflict-warning {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Loading overlay improvements */
+#loading-overlay {
+    z-index: 9999;
+}
+
+.pulsing-loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #f59e0b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

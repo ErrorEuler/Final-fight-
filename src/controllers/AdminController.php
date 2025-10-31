@@ -556,7 +556,7 @@ class AdminController
             ];
             $employmentTypes = ['Regular', 'Contractual', 'Part-time', 'Full-time'];
             $classifications = ['TL', 'VSL'];
-        
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$this->authService->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
                     $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid CSRF token'];
@@ -617,7 +617,7 @@ class AdminController
             ];
 
             extract($viewData);
-    
+
             require_once __DIR__ . '/../views/admin/users.php';
         } catch (PDOException $e) {
             error_log("Manage users error: " . $e->getMessage());
@@ -2116,5 +2116,72 @@ class AdminController
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
         return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
+    /**
+     * Manage admission applications
+     */
+    public function manageApplications()
+    {
+        AuthMiddleware::handle('admin');
+
+        $admissionService = new AdmissionService($this->db);
+
+        // Handle application actions
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['approve_application'])) {
+                $applicationId = intval($_POST['application_id']);
+                $reviewedBy = $_SESSION['user_id'];
+
+                try {
+                    $userId = $admissionService->approveApplication($applicationId, $reviewedBy);
+                    $_SESSION['success'] = "Application approved successfully. User account created.";
+                } catch (Exception $e) {
+                    $_SESSION['error'] = "Failed to approve application: " . $e->getMessage();
+                }
+            } elseif (isset($_POST['reject_application'])) {
+                $applicationId = intval($_POST['application_id']);
+                $reviewedBy = $_SESSION['user_id'];
+                $reason = trim($_POST['rejection_reason'] ?? '');
+
+                if (empty($reason)) {
+                    $_SESSION['error'] = "Rejection reason is required.";
+                } else {
+                    $success = $admissionService->rejectApplication($applicationId, $reviewedBy, $reason);
+                    if ($success) {
+                        $_SESSION['success'] = "Application rejected successfully.";
+                    } else {
+                        $_SESSION['error'] = "Failed to reject application.";
+                    }
+                }
+            }
+
+            header('Location: /admin/applications');
+            exit;
+        }
+
+        // Get pending applications
+        $page = intval($_GET['page'] ?? 1);
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+
+        $applications = $admissionService->getPendingApplications($limit, $offset);
+        $totalApplications = $this->getTotalPendingApplications();
+        $totalPages = ceil($totalApplications / $limit);
+
+        require_once __DIR__ . '/../views/admin/applications.php';
+    }
+
+    private function getTotalPendingApplications()
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM admission_applications WHERE status = 'pending'";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Error counting pending applications: " . $e->getMessage());
+            return 0;
+        }
     }
 }

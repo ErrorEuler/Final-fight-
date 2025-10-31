@@ -1076,6 +1076,42 @@ try {
                 loadDepartments();
             <?php endif; ?>
         });
+
+        // CAPTCHA functionality
+        function refreshCaptcha() {
+            fetch('/api/generate-captcha')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('captcha-image').textContent = data.captcha;
+                    } else {
+                        console.error('Failed to generate CAPTCHA:', data.error);
+                        // Fallback: generate client-side CAPTCHA
+                        generateFallbackCaptcha();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing CAPTCHA:', error);
+                    generateFallbackCaptcha();
+                });
+        }
+
+        // Fallback CAPTCHA generation
+        function generateFallbackCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let captcha = '';
+            for (let i = 0; i < 6; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('captcha-image').textContent = captcha;
+            // Store in sessionStorage as fallback
+            sessionStorage.setItem('fallback_captcha', captcha);
+        }
+
+        // Generate CAPTCHA on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshCaptcha();
+        });
     </script>
 </body>
 

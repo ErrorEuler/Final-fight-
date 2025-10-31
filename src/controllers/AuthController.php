@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../services/AuthService.php';
 require_once __DIR__ . '/../services/EmailService.php';
+require_once __DIR__ . '/../services/SecurityService.php'; // ADD THIS LINE
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/UserModel.php';
 
@@ -97,9 +98,11 @@ class AuthController
             require_once __DIR__ . '/../views/auth/login.php';
         }
     }
-    
+
+    // In your existing AuthController.php, replace the register method with:
+
     /**
-     * Handle registration request
+     * Handle admission application request - SIMPLIFIED VERSION
      */
     public function register()
     {
@@ -109,23 +112,19 @@ class AuthController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Received roles: " . print_r($_POST['roles'] ?? 'empty', true));
-            error_log("Received department_ids: " . print_r($_POST['department_ids'] ?? 'empty', true));
 
-            // Handle department IDs - can be multiple for Program Chair
+            // Process department IDs
             $departmentIds = [];
             $primaryDepartmentId = 0;
 
             if (isset($_POST['department_ids']) && is_array($_POST['department_ids'])) {
-                // Multiple departments selected (Program Chair)
                 $departmentIds = array_map('intval', $_POST['department_ids']);
                 $primaryDepartmentId = intval($_POST['primary_department_id'] ?? 0);
 
-                // If no primary set, use first one
                 if ($primaryDepartmentId === 0 && !empty($departmentIds)) {
                     $primaryDepartmentId = $departmentIds[0];
                 }
             } else {
-                // Single department
                 $primaryDepartmentId = intval($_POST['department_id'] ?? 0);
                 $departmentIds = [$primaryDepartmentId];
             }
@@ -142,13 +141,14 @@ class AuthController
                 'phone' => trim($_POST['phone'] ?? ''),
                 'roles' => isset($_POST['roles']) ? array_map('intval', (array)$_POST['roles']) : [],
                 'college_id' => intval($_POST['college_id'] ?? 0),
-                'department_id' => $primaryDepartmentId, // Primary department
-                'department_ids' => $departmentIds, // All selected departments
+                'department_id' => $primaryDepartmentId,
+                'department_ids' => $departmentIds,
                 'academic_rank' => trim($_POST['academic_rank'] ?? ''),
                 'employment_type' => trim($_POST['employment_type'] ?? ''),
                 'classification' => trim($_POST['classification'] ?? ''),
                 'program_id' => !empty($_POST['program_id']) ? intval($_POST['program_id']) : null,
-                'role_id' => !empty($_POST['roles']) ? (int)reset($_POST['roles']) : null
+                'role_id' => !empty($_POST['roles']) ? (int)reset($_POST['roles']) : null,
+                'is_active' => 0 // Set to inactive for admission system
             ];
 
             error_log("Data to be registered: " . json_encode($data));
@@ -171,43 +171,10 @@ class AuthController
             if (empty($data['department_ids'])) $errors[] = "At least one department is required.";
             if (empty($data['role_id'])) $errors[] = "A valid role is required.";
 
-            // Check if Program Chair is selected
-            $isProgramChair = in_array(5, $data['roles']);
-
-            if ($isProgramChair) {
-                if (count($data['department_ids']) === 0) {
-                    $errors[] = "Program Chair must be assigned to at least one department.";
-                }
-
-                if (count($data['department_ids']) > 1 && empty($data['department_id'])) {
-                    $errors[] = "Please select a primary department.";
-                }
-
-                // Get program_id from first department (you may need to adjust this logic)
-                if (empty($data['program_id'])) {
-                    try {
-                        $programs = $this->userModel->getProgramsByDepartment($data['department_id']);
-                        if (!empty($programs)) {
-                            $data['program_id'] = $programs[0]['program_id'];
-                        } else {
-                            $errors[] = "No program found for the selected department.";
-                        }
-                    } catch (Exception $e) {
-                        $errors[] = "Error loading program information.";
-                    }
-                }
-            }
-
             if (empty($errors)) {
                 try {
                     if ($this->authService->register($data)) {
-                        $deptCount = count($data['department_ids']);
-                        $deptText = $deptCount > 1 ? "$deptCount departments" : "1 department";
-
-                        $success = $isProgramChair || in_array(6, $data['roles'])
-                            ? "Registration submitted successfully for $deptText. Awaiting Dean approval."
-                            : "Registration successful. You can now log in.";
-
+                        $success = "Your application has been submitted successfully and is pending approval. You will receive an email notification once it's reviewed.";
                         header('Location: /login?success=' . urlencode($success));
                         exit;
                     } else {

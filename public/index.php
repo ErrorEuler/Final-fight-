@@ -101,6 +101,10 @@ function handleAdminRoutes($path)
             error_log("Routing to AdminController::backupDatabase");
             $controller->databaseBackup();
             break;
+        case '/admin/applications':
+            error_log("Routing to AdminController::manageApplications");
+            $controller->manageApplications();
+            break;
         case '/admin/logout':
             error_log("Routing to AuthController::logout");
             require_once __DIR__ . '/../src/controllers/AuthController.php';
@@ -504,6 +508,26 @@ if (in_array($path, $publicRoutes)) {
             http_response_code(404);
             echo "Page not found";
             break;
+    }
+    exit;
+}
+
+// Add this to your public routes - REPLACE the existing one if it exists
+if ($path === 'api/generate-captcha') {
+    require_once __DIR__ . '/../src/config/Database.php'; // ADD THIS LINE
+    require_once __DIR__ . '/../src/services/SecurityService.php'; // ADD THIS LINE
+
+    try {
+        $db = (new Database())->connect();
+        $securityService = new SecurityService($db);
+        $captchaCode = $securityService->generateCaptcha();
+
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'captcha' => $captchaCode]);
+    } catch (Exception $e) {
+        error_log("CAPTCHA generation error: " . $e->getMessage());
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Failed to generate CAPTCHA']);
     }
     exit;
 }
